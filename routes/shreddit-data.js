@@ -24,7 +24,13 @@ var router = express.Router();
 
 // var rootpath = path.resolve(process.cwd(), '..');
 
+/* Type 3: Persistent datastore with automatic loading*/
+var Nedb = require('nedb')
+    , postings = new Nedb({ filename: '../public/path/to/data/postings', autoload: true });
 
+var comments = new Nedb({ filename: '../public/path/to/data/comments', autoload: true });
+
+/*  todo  delete
 var postings = [
   { "id": "1003", "title": "241543903", "user": "fridge", "version": "1", "time": "2014-08-11T17:07:02.000Z", "rating": "2.29", "people": "7", "link": "HSR", "url": "http://www.hsr.ch", "commentCount": "4", "tags": "", "content": "Wenn man in der Google Bildersuche nach 241543903 sucht, findet man Menschen, die ihren Kopf in Kühlschränke stecken."},
   { "id": "1001", "title": "Sektflasche", "user": "cyrano", "version": "1", "time": "2014-08-01T10:44:00.000Z", "rating": "3.00", "people": "5", "link": "HSR", "url": "http://www.hsr.ch", "commentCount": "0", "tags": "", "content": "Die Bezeichnung für eine Sektflasche mit sechs Litern Inhalt ist „Methusalem“."},
@@ -44,16 +50,32 @@ var postings = [
   { "id": "1029", "title": "HUGO", "user": "bie", "version": "1", "time": "2014-10-19T16:23:39.000Z", "rating": "2.50", "people": "4", "link": "HSR", "url": "http://www.hsr.ch", "commentCount": "0", "tags": "", "content": "Das Codewort „HUGO“ bezeichnet im Flugbetrieb mittransportierte Leichen – es steht entweder für „Human Gone“ oder für „heute unerwartet gestorbenes Objekt“."},
   { "id": "1030", "title": "Roulette", "user": "ceanage", "version": "1", "time": "2014-10-25T00:39:05.000Z", "rating": "4.00", "people": "1", "link": "HSR", "url": "http://www.hsr.ch", "commentCount": "0", "tags": "", "content": "Alle Roulettezahlen addiert ergeben 666."}
 ];
-
+*/
 // GET     /postings                      // get all postings
 router.get('/postings', function(req, res) {
-  res.json(postings);
+    postings.find({}, function (err, docs) {
+        if (docs.length <= 0) {
+
+            console.log('the databas <posting> has no element');
+        } else {
+            console.log('the databas <posting> has ' + docs.length + ' elements');
+        }
+        res.json(docs);
+    });
 });
 
 // POST    /postings                      // create new posting
 router.post("/postings", function(req, res) {
   // res.json(DB.createPosting(req.body.user, req.body.title, req.body.content, req.body.link, req.body.url, req.body.tags));
-});
+/*
+    console.log('new postings');
+    postings.insert(req.body, function (err, newDoc) {
+        console.log('new posting '+ newDoc.title+ ' _id '+newDoc._id);
+        res.send({msg: newDoc._id});
+
+*/
+
+    });
 
 // GET     /postings/:PID                 // get posting with PID
 router.get("/postings/:PID", function(req, res) {
@@ -68,6 +90,16 @@ router.delete("/", function(req, res) {
 // GET     /comments/:PID                 // get all comments for posting with PID
 router.get("/comments/:PID", function(req, res) {
   // res.json(DB.getComments(req.params.PID));
+
+  comments.find({pid:req.params.PID},function(err,doc) {
+
+     if (doc.length <= 0) {
+            console.log('no element for databas <comments> !');
+     } else {
+            console.log('the databas <comments> has ' +doc.length + 'element for user' );
+     }
+      res.json(doc);
+  });
 });
 
 // POST    /comments/:PID                 // create new comment for posting with PID
